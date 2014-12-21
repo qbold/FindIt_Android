@@ -1,6 +1,6 @@
-attribute vec2 pos;
 attribute vec2 texture;
 varying vec2 tex_coord;
+attribute vec2 pos;
 
 void main() {
 	tex_coord = texture;

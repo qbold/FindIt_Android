@@ -1,7 +1,6 @@
 #extension GL_OES_EGL_image_external : require
-precision lowp float;
+precision mediump float;
 uniform samplerExternalOES u_img;
-uniform float dx, dy;
 varying vec2 tex_coord;
 
 void main() {

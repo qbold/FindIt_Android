@@ -17,12 +17,13 @@ public class Core extends Activity {
 	public Camera camera;
 
 	public DrawView view;
-	public int w, h;
+	private int w, h;
 	public int[] pix;
 	public Bitmap bitmap;
 	public static Core core;
 	private WakeLock mWL;
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle v) {
 		super.onCreate(v);
@@ -53,31 +54,25 @@ public class Core extends Activity {
 		w = 0;
 		h = 0;
 		for (Size s : p.getSupportedPreviewSizes()) {
-			if (w == 0 || (w < s.width)) {
+			if (w == 0 || (w > s.width)) {
 				w = s.width;
 				h = s.height;
 			}
 		}
-
-		DrawView.dx = 1f / w;
-		DrawView.dy = 1f / h;
-
 		pix = new int[w * h];
-		// p.setPreviewSize(w, h);
-		// camera.setParameters(p);
+		//p.setPreviewSize(w, h);
+	//	camera.setParameters(p);
 		view.onResume();
 
 	}
 
 	public void startPreview() {
-		if (camera != null)
-			try {
-				camera.setPreviewTexture(view.tex);
-
-				camera.startPreview();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		try {
+			camera.setPreviewTexture(view.tex);
+			camera.startPreview();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
