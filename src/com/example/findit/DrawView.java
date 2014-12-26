@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -20,8 +19,9 @@ import android.opengl.GLSurfaceView;
 
 public class DrawView extends GLSurfaceView {
 
-	public SurfaceTexture tex; // отображаемая текстура
+	public static SurfaceTexture tex; // отображаемая текстура
 	public static float dx, dy; // размер текселя
+	public static boolean get_pix;
 
 	public DrawView(Context context) {
 		super(context);
@@ -60,31 +60,46 @@ public class DrawView extends GLSurfaceView {
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 			String vertShader = read("standard.vert");
 
-			String fragShader = read("gaussian_linear.frag");
-			String fragShader2 = read("harris.frag");
-			String fragShader3 = read("gaussian_linear2.frag");
-			//String fragShader4 = read("erosion.frag");
+			// String fragShader = read("gaussian_linear.frag");
+			// String fragShader2 = read("harris.frag");
+			// String fragShader3 = read("gaussian_linear2.frag");
+			// String fragShader4 = read("standard.frag");
 
-			ShaderProgram program1 = new ShaderProgram(vertShader, fragShader,
-					"pos", "texture");
-			ShaderProgram program2 = new ShaderProgram(vertShader, fragShader2,
-					"pos", "texture");
-			ShaderProgram program3 = new ShaderProgram(vertShader, fragShader3,
-					"pos", "texture");
-			//ShaderProgram program4 = new ShaderProgram(vertShader, fragShader4,
-			//		"pos", "texture");
+			String simple_grad = read("simple_gradient.frag");
 
-			program1.addUniform(Uniform.FLOAT, "dx", dx);
-			program1.addUniform(Uniform.FLOAT, "dy", dy);
+			// ShaderProgram program1 = new ShaderProgram(vertShader,
+			// fragShader,
+			// "pos", "texture"); // gaussian linear
+			// ShaderProgram program2 = new ShaderProgram(vertShader,
+			// fragShader2,
+			// "pos", "texture"); // harris
+			// ShaderProgram program3 = new ShaderProgram(vertShader,
+			// fragShader3,
+			// "pos", "texture"); // gaussian linear 2
+			// ShaderProgram program5 = new ShaderProgram(vertShader,
+			// fragShader4,
+			// "pos", "texture"); // standard
 
-			program2.addUniform(Uniform.FLOAT, "dx", dx);
-			program2.addUniform(Uniform.FLOAT, "dy", dy);
+			ShaderProgram program6 = new ShaderProgram(vertShader, simple_grad,
+					"pos", "texture"); // standard
 
-			program3.addUniform(Uniform.FLOAT, "dx", dx);
-			program3.addUniform(Uniform.FLOAT, "dy", dy);
+			// program1.addUniform(Uniform.FLOAT, "dx", dx);
+			// program1.addUniform(Uniform.FLOAT, "dy", dy);
 
-			//program4.addUniform(Uniform.FLOAT, "dx", dx);
-			//program4.addUniform(Uniform.FLOAT, "dy", dy);
+			// program2.addUniform(Uniform.FLOAT, "dx", dx);
+			// program2.addUniform(Uniform.FLOAT, "dy", dy);
+
+			// program3.addUniform(Uniform.FLOAT, "dx", dx);
+			// program3.addUniform(Uniform.FLOAT, "dy", dy);
+
+			// program5.addUniform(Uniform.FLOAT, "dx", dx);
+			// program5.addUniform(Uniform.FLOAT, "dy", dy);
+
+			program6.addUniform(Uniform.FLOAT, "dx", dx);
+			program6.addUniform(Uniform.FLOAT, "dy", dy);
+
+			// program4.addUniform(Uniform.FLOAT, "dx", dx);
+			// program4.addUniform(Uniform.FLOAT, "dy", dy);
 
 			stages = new ArrayList<>();
 
@@ -101,28 +116,50 @@ public class DrawView extends GLSurfaceView {
 			GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
 					GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
-			RenderStage s1 = new RenderStage(program1, tx[0],
-					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
-			s1.addUniform(Uniform.IMAGE, "u_img", 0);
+			// RenderStage s1 = new RenderStage(program1, tx[0],
+			// GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, false);
+			// s1.addUniform(Uniform.IMAGE, "u_img", 0);
 			// s1.addUniform(Uniform.FLOAT, "hor", 1);
 
-			RenderStage s2 = new RenderStage(program3, s1.textureOutput,
-					GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE1, true);
-			s2.addUniform(Uniform.IMAGE, "u_img", 1);
+			// RenderStage s2 = new RenderStage(program3, s1.textureOutput,
+			// GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE1, true);
+			// s2.addUniform(Uniform.IMAGE, "u_img", 1);
 			// s2.addUniform(Uniform.FLOAT, "hor", 0);
 
-			RenderStage s3 = new RenderStage(program2, s2.textureOutput,
-					GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE2, false);
-			s3.addUniform(Uniform.IMAGE, "u_img", 2);
+			// RenderStage s4 = new RenderStage(program1, s2.textureOutput,
+			// GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE2, true);
+			// s4.addUniform(Uniform.IMAGE, "u_img", 2);
 
-			//RenderStage s4 = new RenderStage(program4, s3.textureOutput,
-			//		GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE3, false);
-			//s4.addUniform(Uniform.IMAGE, "u_img", 3);
+			// RenderStage s5 = new RenderStage(program3, s4.textureOutput,
+			// GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE3, true);
+			// s5.addUniform(Uniform.IMAGE, "u_img", 3);
 
-			stages.add(s1);
-			stages.add(s2);
-			stages.add(s3);
-			//stages.add(s4);
+			// RenderStage s3 = new RenderStage(program6, s2.textureOutput,
+			// GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE2, false);
+			// s3.as_output = true;
+			// s3.addUniform(Uniform.IMAGE, "u_img", 2);
+
+			RenderStage s6 = new RenderStage(program6, tx[0],
+					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
+			s6.as_output = true;
+			s6.addUniform(Uniform.FLOAT, "type", 0);
+
+			RenderStage s61 = new RenderStage(program6, tx[0],
+					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
+			s61.as_output = true;
+			s61.addUniform(Uniform.FLOAT, "type", 1);
+
+			RenderStage s62 = new RenderStage(program6, tx[0],
+					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
+			s62.as_output = true;
+			s62.addUniform(Uniform.FLOAT, "type", 2);
+
+			// stages.add(s1);
+			// stages.add(s2);
+			// stages.add(s4);
+			// stages.add(s5);
+			// stages.add(s3);
+			stages.add(s6);
 
 			tex = new SurfaceTexture(tx[0]);
 
@@ -169,9 +206,12 @@ public class DrawView extends GLSurfaceView {
 		private ShaderProgram program;
 
 		private static FloatBuffer cords, texc;
+		private static ByteBuffer pixels;
 		// private static ShortBuffer ind;
 
 		private ArrayList<Uniform> uniforms;
+
+		public boolean as_output;
 
 		static {
 			float[] coords = { -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
@@ -196,6 +236,10 @@ public class DrawView extends GLSurfaceView {
 			// ind = bf.asShortBuffer();
 			// ind.put(indeces);
 			// ind.position(0);
+
+			pixels = ByteBuffer.allocateDirect(Core.core.w * Core.core.h * 3);
+			pixels.order(ByteOrder.nativeOrder());
+			pixels.position(0);
 		}
 
 		public RenderStage(ShaderProgram program, int texture_glBindTexture,
@@ -267,6 +311,24 @@ public class DrawView extends GLSurfaceView {
 			GLES20.glEnableVertexAttribArray(program.indx);
 			GLES20.glEnableVertexAttribArray(program.indx2);
 			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+
+			if (as_output && tex != null) {
+				get_pix = true;
+
+				pixels.position(0);
+				// GLES20.glReadPixels(0, 0, Core.core.w, Core.core.h,
+				// GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, pixels);
+
+				long s = System.currentTimeMillis();
+				GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB,
+						Core.core.w, Core.core.h, 0, GLES20.GL_RGB,
+						GLES20.GL_UNSIGNED_BYTE, pixels);
+				FeatureSelector.feature(pixels);
+
+				System.out.println(System.currentTimeMillis() - s);
+
+				get_pix = false;
+			}
 		}
 
 		public void addUniform(int type, String s, double v) {

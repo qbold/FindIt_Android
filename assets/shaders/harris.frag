@@ -1,6 +1,6 @@
-//#extension GL_OES_EGL_image_external : require
+#extension GL_OES_EGL_image_external : require
 precision lowp float;
-uniform sampler2D u_img;
+uniform samplerExternalOES u_img;
 uniform float dx, dy;
 varying vec2 tex_coord;
 
@@ -44,12 +44,15 @@ void main() {
 	float y2 = Iy*Iy; // lambda2
 	float trace = (Ix+Iy); // trace(M)
 	
-	float Mc = y1*y2-Ixy*Ixy - 0.3*trace*trace;
+	float Mc = y1*y2-Ixy*Ixy - 0.04*trace*trace;
 	
-	Mc=Mc/10.0;
+	//Mc=Mc/10.0;
+	Mc-=0.2;
 	
 	while(Mc < 0.0) Mc += 1.0;
 	while(Mc > 1.0) Mc -= 1.0;
+	
+	Mc=1.0-Mc;
 	
 	gl_FragColor = vec4(Mc, Mc, Mc, 1.0);
 }

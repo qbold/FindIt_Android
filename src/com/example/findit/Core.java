@@ -23,6 +23,7 @@ public class Core extends Activity {
 	public static Core core;
 	private WakeLock mWL;
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle v) {
 		super.onCreate(v);
@@ -52,15 +53,24 @@ public class Core extends Activity {
 
 		w = 0;
 		h = 0;
+		int max_w = 0;
 		for (Size s : p.getSupportedPreviewSizes()) {
-			if (w == 0 || (w < s.width)) {
+			if (
+			// w == 0 ||
+			(w > s.width || w == 0)) {
 				w = s.width;
 				h = s.height;
 			}
+			if (max_w < s.width) {
+				max_w = s.width;
+			}
+			if (max_w < s.height) {
+				max_w = s.height;
+			}
 		}
 
-		DrawView.dx = 1f / w;
-		DrawView.dy = 1f / h;
+		DrawView.dx = 1f / max_w;
+		DrawView.dy = 1f / max_w;
 
 		pix = new int[w * h];
 		// p.setPreviewSize(w, h);
