@@ -63,9 +63,10 @@ public class DrawView extends GLSurfaceView {
 			// String fragShader = read("gaussian_linear.frag");
 			// String fragShader2 = read("harris.frag");
 			// String fragShader3 = read("gaussian_linear2.frag");
-			// String fragShader4 = read("standard.frag");
+			String fragShader4 = read("standard.frag");
 
 			String simple_grad = read("simple_gradient.frag");
+			String hog = read("hog.frag");
 
 			// ShaderProgram program1 = new ShaderProgram(vertShader,
 			// fragShader,
@@ -76,12 +77,14 @@ public class DrawView extends GLSurfaceView {
 			// ShaderProgram program3 = new ShaderProgram(vertShader,
 			// fragShader3,
 			// "pos", "texture"); // gaussian linear 2
-			// ShaderProgram program5 = new ShaderProgram(vertShader,
-			// fragShader4,
-			// "pos", "texture"); // standard
+			ShaderProgram program5 = new ShaderProgram(vertShader, fragShader4,
+					"pos", "texture"); // standard
 
 			ShaderProgram program6 = new ShaderProgram(vertShader, simple_grad,
-					"pos", "texture"); // standard
+					"pos", "texture"); // simple grad
+
+			ShaderProgram program7 = new ShaderProgram(vertShader, hog, "pos",
+					"texture"); // hog
 
 			// program1.addUniform(Uniform.FLOAT, "dx", dx);
 			// program1.addUniform(Uniform.FLOAT, "dy", dy);
@@ -92,11 +95,14 @@ public class DrawView extends GLSurfaceView {
 			// program3.addUniform(Uniform.FLOAT, "dx", dx);
 			// program3.addUniform(Uniform.FLOAT, "dy", dy);
 
-			// program5.addUniform(Uniform.FLOAT, "dx", dx);
-			// program5.addUniform(Uniform.FLOAT, "dy", dy);
+			program5.addUniform(Uniform.FLOAT, "dx", dx);
+			program5.addUniform(Uniform.FLOAT, "dy", dy);
 
 			program6.addUniform(Uniform.FLOAT, "dx", dx);
 			program6.addUniform(Uniform.FLOAT, "dy", dy);
+
+			program7.addUniform(Uniform.FLOAT, "dx", dx);
+			program7.addUniform(Uniform.FLOAT, "dy", dy);
 
 			// program4.addUniform(Uniform.FLOAT, "dx", dx);
 			// program4.addUniform(Uniform.FLOAT, "dy", dy);
@@ -139,27 +145,44 @@ public class DrawView extends GLSurfaceView {
 			// s3.as_output = true;
 			// s3.addUniform(Uniform.IMAGE, "u_img", 2);
 
-			RenderStage s6 = new RenderStage(program6, tx[0],
-					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
-			s6.as_output = true;
+			RenderStage s6 = new RenderStage(program5, tx[0],
+					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0,
+					false);
 			s6.addUniform(Uniform.FLOAT, "type", 0);
 
-			RenderStage s61 = new RenderStage(program6, tx[0],
-					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
-			s61.as_output = true;
-			s61.addUniform(Uniform.FLOAT, "type", 1);
+			// RenderStage s62 = new RenderStage(program6, tx[0],
+			// GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
+			// s62.as_output = true;
+			// s62.addUniform(Uniform.FLOAT, "type", 2);
+			// s62.addUniform(Uniform.IMAGE, "u_img", 0);
 
-			RenderStage s62 = new RenderStage(program6, tx[0],
-					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
-			s62.as_output = true;
-			s62.addUniform(Uniform.FLOAT, "type", 2);
+			// RenderStage s61 = new RenderStage(program6, tx[0],
+			// GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
+			// s61.as_output = true;
+			// s61.addUniform(Uniform.FLOAT, "type", 1);
+			// s61.addUniform(Uniform.IMAGE, "u_img", 0);
+
+			RenderStage s7 = new RenderStage(program7, tx[0],
+					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0,
+					false);
+
+			// RenderStage s7 = new RenderStage(program7, new int[] {
+			// s61.textureOutput, s62.textureOutput }, new int[] {
+			// GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_2D }, new int[] {
+			// GLES20.GL_TEXTURE1, GLES20.GL_TEXTURE2 }, false);
+			s7.addUniform(Uniform.IMAGE, "u_img", 0);
+			// s7.addUniform(Uniform.IMAGE, "a", 1);
+			// s7.addUniform(Uniform.IMAGE, "b", 2);
 
 			// stages.add(s1);
 			// stages.add(s2);
 			// stages.add(s4);
 			// stages.add(s5);
 			// stages.add(s3);
-			stages.add(s6);
+			// stages.add(s61);
+			// stages.add(s62);
+			stages.add(s7);
+			// stages.add(s6);
 
 			tex = new SurfaceTexture(tx[0]);
 
@@ -200,14 +223,16 @@ public class DrawView extends GLSurfaceView {
 
 	private static class RenderStage {
 
-		private int framebuffer, textureOutput, texture_glActive,
-				texture_glBindTexture, type_texture_glBindTexture;
+		private int framebuffer, textureOutput, texture_glActive[],
+				texture_glBindTexture[], type_texture_glBindTexture[];
 
 		private ShaderProgram program;
 
 		private static FloatBuffer cords, texc;
 		private static ByteBuffer pixels;
 		// private static ShortBuffer ind;
+
+		private Selector selector;
 
 		private ArrayList<Uniform> uniforms;
 
@@ -242,8 +267,8 @@ public class DrawView extends GLSurfaceView {
 			pixels.position(0);
 		}
 
-		public RenderStage(ShaderProgram program, int texture_glBindTexture,
-				int type_texture_glBindTexture, int texture_glActive,
+		public RenderStage(ShaderProgram program, int texture_glBindTexture[],
+				int type_texture_glBindTexture[], int texture_glActive[],
 				boolean gen_buffer) {
 
 			uniforms = new ArrayList<>();
@@ -278,6 +303,50 @@ public class DrawView extends GLSurfaceView {
 			}
 		}
 
+		public RenderStage(ShaderProgram program, int texture_glBindTexture,
+				int type_texture_glBindTexture, int texture_glActive,
+				boolean gen_buffer) {
+
+			uniforms = new ArrayList<>();
+
+			this.texture_glActive = new int[] { texture_glActive };
+			this.program = program;
+			this.type_texture_glBindTexture = new int[] { type_texture_glBindTexture };
+			this.texture_glBindTexture = new int[] { texture_glBindTexture };
+
+			if (gen_buffer) {
+				int[] fb = new int[1];
+				GLES20.glGenFramebuffers(1, fb, 0);
+				framebuffer = fb[0];
+
+				int tx[] = new int[1];
+				GLES20.glGenTextures(1, tx, 0);
+
+				GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, framebuffer);
+				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tx[0]);
+				GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB,
+						Core.core.w, Core.core.h, 0, GLES20.GL_RGB,
+						GLES20.GL_UNSIGNED_BYTE, null);
+				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+						GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+						GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+				GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER,
+						GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D,
+						tx[0], 0);
+
+				textureOutput = tx[0];
+			}
+		}
+
+		public void setSelector(Selector s) {
+			selector = s;
+		}
+
+		public Selector getSelector() {
+			return selector;
+		}
+
 		public void paint() {
 			GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, framebuffer);
 			GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT
@@ -285,9 +354,11 @@ public class DrawView extends GLSurfaceView {
 			GLES20.glClearColor(0, 0, 0, 0);
 
 			GLES20.glUseProgram(program.program);
-			GLES20.glActiveTexture(texture_glActive);
-			GLES20.glBindTexture(type_texture_glBindTexture,
-					texture_glBindTexture);
+			for (int i = 0; i < texture_glActive.length; i++) {
+				GLES20.glActiveTexture(texture_glActive[i]);
+				GLES20.glBindTexture(type_texture_glBindTexture[i],
+						texture_glBindTexture[i]);
+			}
 
 			for (Uniform u : uniforms) {
 				if (u.type == Uniform.FLOAT) {
@@ -312,7 +383,7 @@ public class DrawView extends GLSurfaceView {
 			GLES20.glEnableVertexAttribArray(program.indx2);
 			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
-			if (as_output && tex != null) {
+			if (as_output && tex != null && selector != null) {
 				get_pix = true;
 
 				pixels.position(0);
@@ -323,12 +394,31 @@ public class DrawView extends GLSurfaceView {
 				GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB,
 						Core.core.w, Core.core.h, 0, GLES20.GL_RGB,
 						GLES20.GL_UNSIGNED_BYTE, pixels);
-				FeatureSelector.feature(pixels);
+
+				sendPixelsToSelector();
 
 				System.out.println(System.currentTimeMillis() - s);
 
 				get_pix = false;
 			}
+		}
+
+		private void sendPixelsToSelector() {
+			if (selector == null)
+				return;
+			pixels.position(0);
+
+			byte[] colors = new byte[pixels.capacity()];
+
+			int i = 0;
+			while (pixels.hasRemaining()) {
+				colors[i++] = pixels.get();
+				pixels.get();
+				pixels.get();
+			}
+			pixels.position(0);
+
+			selector.select(colors, Core.core.w);
 		}
 
 		public void addUniform(int type, String s, double v) {
