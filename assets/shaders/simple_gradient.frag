@@ -5,6 +5,10 @@ uniform float dx, dy;
 uniform float type;
 varying vec2 tex_coord;
 
+/*
+	Просто(й) градиент, а точнее обобщённый. При type = 0 возвращает Ixy, 1 - Ix, 2 - Iy
+*/
+
 void main() {
 	vec2 t = tex_coord;
 	

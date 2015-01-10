@@ -4,6 +4,10 @@ uniform samplerExternalOES u_img;
 varying vec2 tex_coord;
 uniform mat3 convolution;
 
+/*
+	—вЄртка
+*/
+
 void main() {
 	mat3 mt = mat3(0.0, 1.0, 0.0,
 		 1.0, -5.0, 1.0,

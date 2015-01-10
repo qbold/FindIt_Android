@@ -4,6 +4,10 @@ uniform sampler2D u_img;
 uniform float dx, dy;
 varying vec2 tex_coord;
 
+/*
+	Ёрози€
+*/
+
 void main() {
 	vec2 tx = tex_coord;
 	

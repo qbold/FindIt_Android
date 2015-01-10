@@ -85,7 +85,6 @@ public class Core extends Activity {
 		if (camera != null)
 			try {
 				camera.setPreviewTexture(view.tex);
-
 				camera.startPreview();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -105,7 +104,6 @@ public class Core extends Activity {
 			camera = null;
 		}
 		view.onPause();
-
 	}
 
 }

@@ -4,55 +4,53 @@ uniform samplerExternalOES u_img;
 uniform float dx, dy;
 varying vec2 tex_coord;
 
+/*
+	Детектор Харриса
+*/
+
 void main() {
 	vec2 t = tex_coord;
 	
-	vec4 c2v = texture2D(u_img, vec2(t.x+2.0*dx,t.y));
-	vec4 c1v = texture2D(u_img, vec2(t.x+1.0*dx,t.y));
-	vec4 c_2v = texture2D(u_img, vec2(t.x-2.0*dx,t.y));
-	vec4 c_1v = texture2D(u_img, vec2(t.x-1.0*dx,t.y));
+	vec4 c = texture2D(u_img, t);
+	float c_ = 0.299*c.r+0.587*c.g+0.114*c.b;
 	
-	float c2 = (c2v.x+c2v.y+c2v.z)/3.0;
-	float c1 = (c1v.x+c1v.y+c1v.z)/3.0;
-	float c_2 = (c_2v.x+c_2v.y+c_2v.z)/3.0;
-	float c_1 = (c_1v.x+c_1v.y+c_1v.z)/3.0;
-	float Ix = (2.0*c2+c1-c_1-2.0*c_2)/6.0;
+	vec4 cx2 = texture2D(u_img, vec2(t.x+dx,t.y));
+	float cx2_ = 0.299*cx2.r+0.587*cx2.g+0.114*cx2.b;
 	
-	c2v = texture2D(u_img, vec2(t.x,t.y+2.0*dy));
-	c1v = texture2D(u_img, vec2(t.x,t.y+1.0*dy));
-	c_2v = texture2D(u_img, vec2(t.x,t.y-2.0*dy));
-	c_1v = texture2D(u_img, vec2(t.x,t.y-1.0*dy));
+	vec4 cx1 = texture2D(u_img, vec2(t.x-dx,t.y));
+	float cx1_ = 0.299*cx1.r+0.587*cx1.g+0.114*cx1.b;
 	
-	c2 = (c2v.x+c2v.y+c2v.z)/3.0;
-	c1 = (c1v.x+c1v.y+c1v.z)/3.0;
-	c_2 = (c_2v.x+c_2v.y+c_2v.z)/3.0;
-	c_1 = (c_1v.x+c_1v.y+c_1v.z)/3.0;
-	float Iy = (2.0*c2+c1-c_1-2.0*c_2)/6.0;
+	vec4 cy2 = texture2D(u_img, vec2(t.x,t.y+dy));
+	float cy2_ = 0.299*cy2.r+0.587*cy2.g+0.114*cy2.b;
 	
-	c2v = texture2D(u_img, vec2(t.x+2.0*dx,t.y+2.0*dy));
-	c1v = texture2D(u_img, vec2(t.x+1.0*dx,t.y+1.0*dy));
-	c_2v = texture2D(u_img, vec2(t.x-2.0*dx,t.y-2.0*dy));
-	c_1v = texture2D(u_img, vec2(t.x-1.0*dx,t.y-1.0*dy));
+	vec4 cy1 = texture2D(u_img, vec2(t.x,t.y-dy));
+	float cy1_ = 0.299*cy1.r+0.587*cy1.g+0.114*cy1.b;
 	
-	c2 = (c2v.x+c2v.y+c2v.z)/3.0;
-	c1 = (c1v.x+c1v.y+c1v.z)/3.0;
-	c_2 = (c_2v.x+c_2v.y+c_2v.z)/3.0;
-	c_1 = (c_1v.x+c_1v.y+c_1v.z)/3.0;
-	float Ixy = (2.0*c2+c1-c_1-2.0*c_2)/6.0;
+	vec4 cxy2 = texture2D(u_img, vec2(t.x+dx,t.y+dy));
+	float cxy2_ = 0.299*cxy2.r+0.587*cxy2.g+0.114*cxy2.b;
+	
+	vec4 cxy1 = texture2D(u_img, vec2(t.x-dx,t.y-dy));
+	float cxy1_ = 0.299*cxy1.r+0.587*cxy1.g+0.114*cxy1.b;
+	
+	float Ix = cx2_-cx1_;//2.0*c_-cx2_-cx1_;
+	float Iy = cy2_-cy1_;//2.0*c_-cy2_-cy1_;
+	float Ixy = cxy2_-cxy1_;//2.0*c_-cxy2_-cxy1_;
 	
 	float y1 = Ix*Ix; // lambda1
 	float y2 = Iy*Iy; // lambda2
 	float trace = (Ix+Iy); // trace(M)
 	
-	float Mc = y1*y2-Ixy*Ixy - 0.04*trace*trace;
+	float Mc = y1*y2-Ixy*Ixy - 0.09*trace*trace;
 	
 	//Mc=Mc/10.0;
-	Mc-=0.2;
+	//Mc-=0.2;
+	Mc=abs(Mc);
+	//Mc=Mc*2.0;
 	
-	while(Mc < 0.0) Mc += 1.0;
-	while(Mc > 1.0) Mc -= 1.0;
+	//while(Mc < 0.0) Mc += 1.0;
+	//while(Mc > 1.0) Mc -= 1.0;
 	
-	Mc=1.0-Mc;
+	//Mc=1.0-Mc;
 	
 	gl_FragColor = vec4(Mc, Mc, Mc, 1.0);
 }

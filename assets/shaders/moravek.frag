@@ -4,6 +4,10 @@ uniform samplerExternalOES u_img;
 uniform float dx, dy;
 varying vec2 tex_coord;
 
+/*
+	Детектор Моравека вроде
+*/
+
 float sr(vec4 s) {
 	return (s.x+s.y+s.z)/3.0;
 }
