@@ -12,6 +12,9 @@ import android.os.PowerManager.WakeLock;
 import android.view.Window;
 import android.view.WindowManager;
 
+/*
+ * Основная активность приложения
+ */
 public class Core extends Activity {
 
 	public Camera camera;
@@ -76,7 +79,6 @@ public class Core extends Activity {
 		// p.setPreviewSize(w, h);
 		// camera.setParameters(p);
 		view.onResume();
-
 	}
 
 	public void startPreview() {

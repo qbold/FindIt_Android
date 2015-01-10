@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import com.example.findit.selector.HoGSelector;
+import com.example.findit.selector.Selector;
+
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
@@ -17,6 +20,9 @@ import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
+/*
+ * Отображение снимка с камеры и графические преобразования через OpenGL
+ */
 public class DrawView extends GLSurfaceView {
 
 	public static SurfaceTexture tex; // отображаемая текстура
@@ -44,7 +50,6 @@ public class DrawView extends GLSurfaceView {
 				is.read(b);
 				return new String(b);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} finally {
 				try {
@@ -163,8 +168,9 @@ public class DrawView extends GLSurfaceView {
 			// s61.addUniform(Uniform.IMAGE, "u_img", 0);
 
 			RenderStage s7 = new RenderStage(program7, tx[0],
-					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0,
-					false);
+					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
+			s7.as_output = true;
+			s7.setSelector(new HoGSelector(Core.core.w, Core.core.h));
 
 			// RenderStage s7 = new RenderStage(program7, new int[] {
 			// s61.textureOutput, s62.textureOutput }, new int[] {
@@ -181,8 +187,9 @@ public class DrawView extends GLSurfaceView {
 			// stages.add(s3);
 			// stages.add(s61);
 			// stages.add(s62);
+
 			stages.add(s7);
-			// stages.add(s6);
+			stages.add(s6);
 
 			tex = new SurfaceTexture(tx[0]);
 
@@ -387,17 +394,17 @@ public class DrawView extends GLSurfaceView {
 				get_pix = true;
 
 				pixels.position(0);
-				// GLES20.glReadPixels(0, 0, Core.core.w, Core.core.h,
-				// GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, pixels);
+				// long s = System.currentTimeMillis();
+				GLES20.glReadPixels(0, 0, Core.core.w, Core.core.h,
+						GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, pixels);
 
-				long s = System.currentTimeMillis();
-				GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB,
-						Core.core.w, Core.core.h, 0, GLES20.GL_RGB,
-						GLES20.GL_UNSIGNED_BYTE, pixels);
+				// GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB,
+				// Core.core.w, Core.core.h, 0, GLES20.GL_RGB,
+				// GLES20.GL_UNSIGNED_BYTE, pixels);
 
 				sendPixelsToSelector();
 
-				System.out.println(System.currentTimeMillis() - s);
+				// System.out.println(System.currentTimeMillis() - s);
 
 				get_pix = false;
 			}
@@ -408,14 +415,25 @@ public class DrawView extends GLSurfaceView {
 				return;
 			pixels.position(0);
 
-			byte[] colors = new byte[pixels.capacity()];
+			byte[] colors = new byte[pixels.capacity() / 3];
 
 			int i = 0;
+			// boolean s = false;
 			while (pixels.hasRemaining()) {
 				colors[i++] = pixels.get();
+				// if (colors[i - 1] > 0)
+				// s = true;
+				// if (
 				pixels.get();
+				// > 0)
+				// s = true;
+				// if (
 				pixels.get();
+				// > 0)
+				// s = true;
 			}
+			// System.out.println(s);
+
 			pixels.position(0);
 
 			selector.select(colors, Core.core.w);
