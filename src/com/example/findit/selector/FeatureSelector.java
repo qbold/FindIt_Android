@@ -12,6 +12,8 @@ public class FeatureSelector implements Selector {
 	private EvaluationFunction eval;
 	private static EvaluationFunction default_eval;
 
+	private static int DEFAULT_SIZE_QUEUE = 500;
+
 	private int threshold;
 
 	static {
@@ -85,21 +87,23 @@ public class FeatureSelector implements Selector {
 	 */
 	@Override
 	public void select(byte[] data, int width) {
-		PriorityQueue<Feature> p = new PriorityQueue<>(data.length / 10);
+		PriorityQueue<Feature> p = new PriorityQueue<>(DEFAULT_SIZE_QUEUE);
 		int h = data.length / width;
-
 		for (int i = 0; i < data.length; i++) {
 			short clr = data[i];
 			if (clr < 0) {
 				clr += 256;
 			}
 
+			if (clr <= threshold)
+				continue;
+
 			if (i > 0) {
 				p.add(new Feature(i % width, i / h, clr));
 			}
 		}
-
-		System.out.println(p.size());
+		
+		//System.out.println(p.size());
 
 		features = p;
 	}

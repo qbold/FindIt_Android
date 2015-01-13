@@ -2,6 +2,7 @@
 precision lowp float;
 uniform samplerExternalOES u_img;
 uniform float dx, dy;
+uniform float threshold;
 varying vec2 tex_coord;
 
 /*
@@ -40,17 +41,11 @@ void main() {
 	float y2 = Iy*Iy; // lambda2
 	float trace = (Ix+Iy); // trace(M)
 	
-	float Mc = y1*y2-Ixy*Ixy - 0.09*trace*trace;
+	float Mc = y1*y2-Ixy*Ixy - 0.03*trace*trace;
 	
-	//Mc=Mc/10.0;
-	//Mc-=0.2;
-	Mc=abs(Mc);
-	//Mc=Mc*2.0;
+	Mc = abs(Mc);
 	
-	//while(Mc < 0.0) Mc += 1.0;
-	//while(Mc > 1.0) Mc -= 1.0;
-	
-	//Mc=1.0-Mc;
+	if(Mc < threshold) Mc=0.0;
 	
 	gl_FragColor = vec4(Mc, Mc, Mc, 1.0);
 }

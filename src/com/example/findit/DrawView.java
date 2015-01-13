@@ -9,6 +9,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.example.findit.selector.FeatureSelector;
 import com.example.findit.selector.HoGSelector;
+import com.example.findit.selector.SaveSelector;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -16,6 +17,7 @@ import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.Environment;
 
 /*
  * Отображение снимка с камеры и графические преобразования через OpenGL
@@ -23,7 +25,7 @@ import android.opengl.GLSurfaceView;
 public class DrawView extends GLSurfaceView {
 
 	public static SurfaceTexture tex; // отображаемая текстура
-	public static float dx, dy; // размер текселя
+	public static float dx, dy, dx2, dy2; // размер текселя
 	public static boolean get_pix;
 
 	public DrawView(Context context) {
@@ -96,8 +98,8 @@ public class DrawView extends GLSurfaceView {
 			// program3.addUniform(Uniform.FLOAT, "dx", dx);
 			// program3.addUniform(Uniform.FLOAT, "dy", dy);
 
-			program5.addUniform(Uniform.FLOAT, "dx", dx);
-			program5.addUniform(Uniform.FLOAT, "dy", dy);
+			program5.addUniform(Uniform.FLOAT, "dx", dx2);
+			program5.addUniform(Uniform.FLOAT, "dy", dy2);
 
 			program6.addUniform(Uniform.FLOAT, "dx", dx);
 			program6.addUniform(Uniform.FLOAT, "dy", dy);
@@ -150,12 +152,16 @@ public class DrawView extends GLSurfaceView {
 					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0,
 					false);
 			s2.as_output = true;
+			// s2.setSelector(new SaveSelector("/sdcard/_files/q/")); Тест
+			// glReadPixels
 			s2.setSelector(new FeatureSelector());
+			s2.addUniform(Uniform.FLOAT, "threshold", 0.2);
 			s2.addUniform(Uniform.IMAGE, "u_img", 0); // Харрис
 
 			RenderStage s6 = new RenderStage(program5, tx[0],
 					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0,
 					false);
+			s6.setVertexCoords(1);
 			s6.addUniform(Uniform.FLOAT, "type", 0);
 
 			// RenderStage s62 = new RenderStage(program6, tx[0],
@@ -171,7 +177,7 @@ public class DrawView extends GLSurfaceView {
 			// s61.addUniform(Uniform.IMAGE, "u_img", 0);
 
 			RenderStage s7 = new RenderStage(program7, tx[0],
-					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, true);
+					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, false);
 			s7.as_output = true;
 			s7.setSelector(new HoGSelector(Core.core.w, Core.core.h));
 
@@ -193,7 +199,7 @@ public class DrawView extends GLSurfaceView {
 
 			stages.add(s7);
 			stages.add(s2);
-			// stages.add(s6);
+			stages.add(s6);
 
 			tex = new SurfaceTexture(tx[0]);
 

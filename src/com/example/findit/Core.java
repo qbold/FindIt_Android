@@ -1,5 +1,9 @@
 package com.example.findit;
 
+import com.example.findit.ml.DataSet;
+import com.example.findit.ml.RecognitionSystem;
+import com.example.findit.ml.SimpleDeltaAlgorithm;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,6 +15,8 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AbsoluteLayout;
+import android.widget.FrameLayout;
 
 /*
  * ќсновна€ активность приложени€
@@ -18,13 +24,17 @@ import android.view.WindowManager;
 public class Core extends Activity {
 
 	public Camera camera;
-
 	public DrawView view;
-	public int w, h;
-	public int[] pix;
-	public Bitmap bitmap;
+	private WakeLock mWL; // чтобы экран не потухал
+
+	public int w, h; // выбранное разрешение снимка
+	public int max_w, max_h; // максимальное разрешение камеры
+
 	public static Core core;
-	private WakeLock mWL;
+
+	private DataSet trainingset;
+	private RecognitionSystem rec;
+	private SimpleDeltaAlgorithm alg;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -41,9 +51,19 @@ public class Core extends Activity {
 				.newWakeLock(PowerManager.FULL_WAKE_LOCK, "WakeLock");
 		mWL.acquire();
 
-		view = new DrawView(this);
+		trainingset = DataSet.loadXML(R.xml.set); // загружаем выборку
 
-		setContentView(view);
+		alg = new SimpleDeltaAlgorithm("Column2", 0.8f); // алгоритм
+		alg.setDataSet(trainingset);
+
+		rec = new RecognitionSystem(alg); // запускаем систему распознавани€
+		rec.start();
+
+		AbsoluteLayout abs = new AbsoluteLayout(this);
+		view = new DrawView(this);
+		abs.addView(view);
+
+		setContentView(abs);
 	}
 
 	@Override
@@ -56,7 +76,8 @@ public class Core extends Activity {
 
 		w = 0;
 		h = 0;
-		int max_w = 0;
+		max_w = 0;
+		max_h = 0;
 		for (Size s : p.getSupportedPreviewSizes()) {
 			if (
 			// w == 0 ||
@@ -67,20 +88,26 @@ public class Core extends Activity {
 			if (max_w < s.width) {
 				max_w = s.width;
 			}
-			if (max_w < s.height) {
-				max_w = s.height;
+			if (max_h < s.height) {
+				max_h = s.height;
 			}
 		}
 
-		DrawView.dx = 1f / max_w;
-		DrawView.dy = 1f / max_w;
+		DrawView.dx = 1f / w;
+		DrawView.dy = 1f / h;
 
-		pix = new int[w * h];
+		DrawView.dx2 = 1f / max_w;
+		DrawView.dy2 = 1f / max_h;
+
 		// p.setPreviewSize(w, h);
 		// camera.setParameters(p);
+
 		view.onResume();
 	}
 
+	/*
+	 * –азрешает камере начать уже отправл€ть данные в текстуру
+	 */
 	public void startPreview() {
 		if (camera != null)
 			try {
