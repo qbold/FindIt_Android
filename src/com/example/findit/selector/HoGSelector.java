@@ -1,5 +1,7 @@
 package com.example.findit.selector;
 
+import com.example.findit.Core;
+
 /*
  * Строит гистограмму ориентированных градиентов по данным изображения
  */
@@ -9,6 +11,8 @@ public class HoGSelector implements Selector {
 			height_blocks, width_image, height_image;
 	private int count_cells_w, count_cells_h, count_blocks_w, count_blocks_h,
 			step_blocks;
+
+	public boolean begin_replacing;
 
 	private byte[] cells_histogram; // гистограмма по каждой ячейке
 
@@ -59,15 +63,27 @@ public class HoGSelector implements Selector {
 		count_blocks_h = (count_cells_h - height_blocks + step_blocks)
 				/ step_blocks;
 
+		System.out.println(count_cells_w + " " + count_cells_h);
+
 		cells_histogram = new byte[count_columns * count_cells_w
 				* count_cells_h];
 		blocks_histogram = new float[count_columns * count_blocks_w
 				* count_blocks_h];
 	}
 
+	/*
+	 * Вернуть вектор
+	 */
+	public float[] getVector() {
+		return blocks_histogram;
+	}
+
 	@Override
 	public void select(byte[] data, int width) {
 		// Формируем гистограмму ориентированных градиентов
+		// System.out.println("SELECT HOG");
+		byte[] tmp_cells_histogram = new byte[cells_histogram.length];
+		float[] tmp_blocks_histogram = new float[blocks_histogram.length];
 
 		for (int i = 0; i < data.length; i++) {
 			int x = i % width;
@@ -86,7 +102,7 @@ public class HoGSelector implements Selector {
 																// в
 																// гистограмме
 
-			cells_histogram[index_cell * count_columns + num_bin]++; // заполняем
+			tmp_cells_histogram[index_cell * count_columns + num_bin]++; // заполняем
 			// гистограмму
 			// (по
 			// порядку
@@ -117,22 +133,42 @@ public class HoGSelector implements Selector {
 					int y_ = y + y_cell; // у текущей ячейки
 					int index_ = x_ + y_ * count_cells_w;
 					for (int k = 0; k < count_columns; k++) {
-						blocks_histogram[k + index_block] += cells_histogram[index_
+						tmp_blocks_histogram[k + index_block] += tmp_cells_histogram[index_
 								+ k];
 					}
 				}
 			}
 
 			// Нормализация гистограммы
-			float div = 0f;
+			float div = 0.001f;
 			for (int k = 0; k < count_columns; k++) {
-				div += blocks_histogram[index_block + k]
-						* blocks_histogram[index_block + k];
+				div += Math.abs(tmp_blocks_histogram[index_block + k]);
+				// * tmp_blocks_histogram[index_block + k];
 			}
-			div = (float) Math.sqrt(div);
+			// div = (float) Math.sqrt(div);
 			for (int k = 0; k < count_columns; k++) {
-				blocks_histogram[index_block + k] /= div;
+				tmp_blocks_histogram[index_block + k] /= div;
 			}
 		}
+
+		/*
+		 * if (System.currentTimeMillis() - old_s - 5000 > 0) {
+		 * System.out.println("VECTOR A"); for (int i = 0; i <
+		 * tmp_blocks_histogram.length; i++) {
+		 * System.out.print(tmp_blocks_histogram[i] + " "); }
+		 * System.out.println("VECTOR A END"); System.out.println("VECTOR B");
+		 * float[] d = Core.core.trainingset.getFloatVector("Column2", 0, ";");
+		 * for (int i = 0; i < d.length; i++) { System.out.print(d[i] + " "); }
+		 * System.out.println("VECTOR B END"); old_s =
+		 * System.currentTimeMillis(); }
+		 */
+
+		begin_replacing = true;
+		cells_histogram = tmp_cells_histogram;
+		blocks_histogram = tmp_blocks_histogram;
+		begin_replacing = false;
+
 	}
+
+	// long old_s;
 }

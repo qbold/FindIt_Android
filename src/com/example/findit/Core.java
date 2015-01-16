@@ -1,7 +1,6 @@
 package com.example.findit;
 
 import com.example.findit.ml.DataSet;
-import com.example.findit.ml.RecognitionSystem;
 import com.example.findit.ml.SimpleDeltaAlgorithm;
 
 import android.app.Activity;
@@ -17,11 +16,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 /*
  * Основная активность приложения
  */
-public class Core extends Activity {
+public class Core extends Activity implements DrawListener {
 
 	public Camera camera;
 	public DrawView view;
@@ -32,9 +32,11 @@ public class Core extends Activity {
 
 	public static Core core;
 
-	private DataSet trainingset;
-	private RecognitionSystem rec;
+	public DataSet trainingset;
+	public RecognitionSystem rec;
 	private SimpleDeltaAlgorithm alg;
+
+	private FrameLayout frame;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -53,17 +55,18 @@ public class Core extends Activity {
 
 		trainingset = DataSet.loadXML(R.xml.set); // загружаем выборку
 
-		alg = new SimpleDeltaAlgorithm("Column2", 0.8f); // алгоритм
+		alg = new SimpleDeltaAlgorithm("Column2", 0.87f); // алгоритм
 		alg.setDataSet(trainingset);
 
 		rec = new RecognitionSystem(alg); // запускаем систему распознавания
+		rec.setDrawListener(this);
 		rec.start();
 
-		AbsoluteLayout abs = new AbsoluteLayout(this);
+		frame = new FrameLayout(this);
 		view = new DrawView(this);
-		abs.addView(view);
+		frame.addView(view);
 
-		setContentView(abs);
+		setContentView(frame);
 	}
 
 	@Override
@@ -133,4 +136,29 @@ public class Core extends Activity {
 		view.onPause();
 	}
 
+	@Override
+	public void addObject(final int id, int x, int y) {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				frame.addView(new TextView(Core.core) {
+					{
+						setText(trainingset.getString("Column1", id));
+					}
+				});
+			}
+		});
+	}
+
+	@Override
+	public void removeObject(final int id) {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				frame.removeViewAt(id + 1);
+			}
+		});
+	}
 }

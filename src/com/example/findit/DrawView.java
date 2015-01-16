@@ -28,6 +28,8 @@ public class DrawView extends GLSurfaceView {
 	public static float dx, dy, dx2, dy2; // размер текселя
 	public static boolean get_pix;
 
+	public HoGSelector HoG;
+
 	public DrawView(Context context) {
 		super(context);
 
@@ -177,9 +179,12 @@ public class DrawView extends GLSurfaceView {
 			// s61.addUniform(Uniform.IMAGE, "u_img", 0);
 
 			RenderStage s7 = new RenderStage(program7, tx[0],
-					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0, false);
+					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0,
+					false);
 			s7.as_output = true;
-			s7.setSelector(new HoGSelector(Core.core.w, Core.core.h));
+			// s7.setSelector(new SaveSelector("/sdcard/_files/q/"));
+			s7.setSelector((HoG = new HoGSelector(Core.core.w, Core.core.h)));
+			Core.core.rec.setSelector(HoG);
 
 			// RenderStage s7 = new RenderStage(program7, new int[] {
 			// s61.textureOutput, s62.textureOutput }, new int[] {

@@ -84,7 +84,10 @@ public class DataSet {
 		Object obj = getObject(key, num);
 		if (obj instanceof float[])
 			return (float[]) obj;
-		StringTokenizer tk = new StringTokenizer((String) obj, delimiters);
+		String str = (String) obj;
+		str = str.replaceAll(",", ".");
+
+		StringTokenizer tk = new StringTokenizer(str, delimiters);
 		float[] fl = new float[tk.countTokens()];
 		int i = 0;
 		while (tk.hasMoreTokens()) {

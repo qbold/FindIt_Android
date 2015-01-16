@@ -7,8 +7,6 @@ public class SimpleDeltaAlgorithm extends MLAlgorithm {
 
 	private float percentage, up_percentage;
 
-	private String key; // Ключ к колонке таблицы DataSet, содержащий векторы
-
 	{
 		up_percentage = 1f;
 	}
@@ -18,7 +16,7 @@ public class SimpleDeltaAlgorithm extends MLAlgorithm {
 	}
 
 	public SimpleDeltaAlgorithm(String key, float percentage) {
-		this.key = key;
+		setKeyString(key);
 		this.percentage = percentage;
 	}
 
@@ -35,20 +33,6 @@ public class SimpleDeltaAlgorithm extends MLAlgorithm {
 	 */
 	public float getUpperLimitPercentage() {
 		return up_percentage;
-	}
-
-	/*
-	 * Установить ключ в DataSet
-	 */
-	public void setKeyString(String w) {
-		this.key = w;
-	}
-
-	/*
-	 * Получить ключ
-	 */
-	public String getKeyString() {
-		return key;
 	}
 
 	/*
@@ -72,45 +56,85 @@ public class SimpleDeltaAlgorithm extends MLAlgorithm {
 	}
 
 	/*
+	 * Разность по Бхаттачарию
+	 */
+	private MLResult getBhattachary(DataSet data) {
+		float[] ds = data.getFloatVector(getKeyString(), 0, ";");
+		float sum_h1 = 0;
+		for (int i = 0; i < ds.length; i++) {
+			sum_h1 += ds[i];
+		}
+
+		int sz = getDataSet().size(getKeyString());
+		int max_index = 0;
+		float max_percent = 0;
+		for (int i = 0; i < sz; i++) {
+			float[] d = getDataSet().getFloatVector(getKeyString(), i, ";");
+			float sum_h2 = 0;
+			for (int j = 0; j < ds.length; j++) {
+				sum_h2 += d[j];
+			}
+			float sum_h1_h2 = sum_h2 * sum_h1;
+
+			float sum = 0;
+			for (int j = 0; j < ds.length; j++) {
+				sum += Math.sqrt(d[j] * ds[j] / sum_h1_h2);
+			}
+			sum = (float) Math.sqrt(1f - sum);
+
+			float percent = 1f - sum;
+			if (percent > max_percent) {
+				max_percent = percent;
+				max_index = i;
+			}
+		}
+		if (max_percent > percentage) {
+			System.out.println("MAX PERCENT: " + max_percent);
+			return new MLResult(max_index + 1);
+		}
+		return new MLResult(0);
+	}
+
+	/*
 	 * Возвращает 0 если ничего не распознал, числа от 1 показывают класс
 	 */
 	@Override
 	public MLResult getResult(DataSet data) {
-		float[] ds = data.getFloatVector(key, 0, ";");
-
-		float sum = 0;
+		float[] ds = data.getFloatVector(getKeyString(), 0, ";"); // то, что
+		// распознаём
+		// Найдём разницу между векторами с помощью расстояния Бхаттачария
+		float sum_h1 = 0;
 		for (int i = 0; i < ds.length; i++) {
-			sum += ds[i] * ds[i];
+			sum_h1 += ds[i];
 		}
 
-		DataSet my = getDataSet();
-		int size = my.size(key);
-
-		float max_percent = 0f;
+		int sz = getDataSet().size(getKeyString());
 		int max_index = 0;
-
-		for (int i = 0; i < size; i++) {
-			float[] sess = my.getFloatVector(key, i, ";");
-			float delta = 0;
-			for (int j = 0; j < sess.length; j++) {
-				float e = sess[j] - ds[j];
-				delta += e * e;
+		float max_percent = 0;
+		for (int i = 0; i < sz; i++) {
+			float[] d = getDataSet().getFloatVector(getKeyString(), i, ";");
+			float sum_h2 = 0;
+			for (int j = 0; j < ds.length; j++) {
+				sum_h2 += d[j];
 			}
-			delta /= sum;
-			delta = 1f - delta; // процент
-			if (delta > max_percent) {
-				max_percent = delta;
-				max_index = i;
+			float sum_h1_h2 = sum_h2 * sum_h1;
 
-				if (max_percent >= up_percentage)
-					break;
+			float sum = 0;
+			for (int j = 0; j < ds.length; j++) {
+				sum += Math.sqrt(d[j] * ds[j] / sum_h1_h2);
+			}
+			sum = (float) Math.sqrt(1f - sum);
+
+			float percent = 1f - sum;
+			if (percent > max_percent) {
+				max_percent = percent;
+				max_index = i;
 			}
 		}
-
-		if (max_percent >= percentage) {
+		if (max_percent > percentage) {
+			System.out.println("MAX PERCENT: " + max_percent);
 			return new MLResult(max_index + 1);
 		}
-
 		return new MLResult(0);
 	}
 }

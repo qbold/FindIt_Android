@@ -7,11 +7,27 @@ public abstract class MLAlgorithm {
 
 	private DataSet set; // обучающая выборка
 
+	private String key; // Ключ к колонке таблицы DataSet, содержащий векторы
+
 	/*
 	 * Установить обучающую выборку
 	 */
 	public void setDataSet(DataSet set) {
 		this.set = set;
+	}
+
+	/*
+	 * Установить ключ в DataSet
+	 */
+	public void setKeyString(String w) {
+		this.key = w;
+	}
+
+	/*
+	 * Получить ключ
+	 */
+	public String getKeyString() {
+		return key;
 	}
 
 	/*

@@ -33,11 +33,11 @@ public class RenderStage {
 	private byte index_coords;
 
 	static {
-		float w_coef = (float) Core.core.w / (float) Core.core.max_w;
-		float h_coef = (float) Core.core.h / (float) Core.core.max_h;
+		double w_coef = (double) Core.core.w / ((double) Core.core.max_w / 2f);
+		double h_coef = (double) Core.core.h / ((double) Core.core.max_h / 2f);
 
-		float pos_x = -1f + w_coef * 2;
-		float pos_y = -1f + h_coef * 2;
+		float pos_x = -1f + 0.2f;// (float) w_coef;
+		float pos_y = -1f + 0.267f;// (float) h_coef;
 		float[] coords = { -1.0f, pos_y, -1.0f, -1.0f, pos_x, pos_y, pos_x,
 				-1.0f };
 		float[] coords2 = { -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f };
