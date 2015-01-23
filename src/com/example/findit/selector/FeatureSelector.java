@@ -1,5 +1,6 @@
 package com.example.findit.selector;
 
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
 /*
@@ -10,6 +11,7 @@ public class FeatureSelector implements Selector {
 	private PriorityQueue<Feature> features;
 
 	private EvaluationFunction eval;
+	private Comparator<Feature> comparator;
 	private static EvaluationFunction default_eval;
 
 	private static int DEFAULT_SIZE_QUEUE = 500;
@@ -28,6 +30,16 @@ public class FeatureSelector implements Selector {
 
 	{
 		eval = default_eval;
+
+		comparator = new Comparator<Feature>() {
+
+			@Override
+			public int compare(Feature lhs, Feature rhs) {
+				double a = eval.evaluate(lhs);
+				double b = eval.evaluate(rhs);
+				return a > b ? -1 : (a == b ? 0 : 1);
+			}
+		};
 	}
 
 	public FeatureSelector() {
@@ -87,7 +99,8 @@ public class FeatureSelector implements Selector {
 	 */
 	@Override
 	public void select(byte[] data, int width) {
-		PriorityQueue<Feature> p = new PriorityQueue<>(DEFAULT_SIZE_QUEUE);
+		PriorityQueue<Feature> p = new PriorityQueue<>(DEFAULT_SIZE_QUEUE,
+				comparator);
 		int h = data.length / width;
 		for (int i = 0; i < data.length; i++) {
 			short clr = data[i];
@@ -102,18 +115,21 @@ public class FeatureSelector implements Selector {
 				p.add(new Feature(i % width, i / h, clr));
 			}
 		}
-		
-		//System.out.println(p.size());
+
+		// System.out.println(p.size());
 
 		features = p;
 	}
 
 	public static interface EvaluationFunction {
 
+		/*
+		 * Функция оценки (чем выше, тем приоритетнее)
+		 */
 		public double evaluate(Feature f);
 	}
 
-	public static class Feature implements Comparable {
+	public static class Feature {
 
 		public short intensity;
 		public short x, y;
@@ -122,11 +138,6 @@ public class FeatureSelector implements Selector {
 			this.x = (short) x;
 			this.y = (short) y;
 			this.intensity = (short) I;
-		}
-
-		@Override
-		public int compareTo(Object another) {
-			return 0;
 		}
 	}
 }

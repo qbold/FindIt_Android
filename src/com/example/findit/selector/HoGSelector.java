@@ -1,7 +1,5 @@
 package com.example.findit.selector;
 
-import com.example.findit.Core;
-
 /*
  * —троит гистограмму ориентированных градиентов по данным изображени€
  */
@@ -63,7 +61,7 @@ public class HoGSelector implements Selector {
 		count_blocks_h = (count_cells_h - height_blocks + step_blocks)
 				/ step_blocks;
 
-		System.out.println(count_cells_w + " " + count_cells_h);
+		// System.out.println(count_cells_w + " " + count_cells_h);
 
 		cells_histogram = new byte[count_columns * count_cells_w
 				* count_cells_h];

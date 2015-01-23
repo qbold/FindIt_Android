@@ -16,12 +16,64 @@ import com.example.findit.R;
  */
 public class DataSet {
 
-	private HashMap<String, ArrayList<Object>> data; // данные
+	private HashMap<String, ArrayList<Object>> data; // данные таблицы
 
 	private boolean is_cache;
+	private String label;
+	private int count_classes;
 
 	public DataSet() {
 		data = new HashMap<>();
+		count_classes = -1;
+	}
+
+	/*
+	 * Вернуть количество классов в выборке
+	 */
+	public int getCountClasses() {
+		if (count_classes + 1 == 0) {
+			int sz = size(label);
+			ArrayList<Integer> e = new ArrayList<>();
+			for (int i = 0; i < sz; i++) {
+				int er = Integer.parseInt((String) data.get(label).get(i));
+				if (!e.contains(er)) {
+					e.add(er);
+				}
+			}
+			count_classes = e.size();
+		}
+		return count_classes;
+	}
+
+	/*
+	 * Узнать класс объекта с индексом id
+	 */
+	public int getClassOfObject(int id) {
+		if (label == null) {
+			return id;
+		}
+		return Integer.parseInt((String) data.get(label).get(id));
+	}
+
+	/*
+	 * Вернуть название колонки с метками объектов
+	 */
+	public String getLabel() {
+		return label;
+	}
+
+	/*
+	 * Не использовать метки объектов из таблицы
+	 */
+	public void removeLabel() {
+		label = null;
+	}
+
+	/*
+	 * Установить колонку с индексами классов
+	 */
+	public void setLabel(String lab) {
+		this.label = lab;
 	}
 
 	/*

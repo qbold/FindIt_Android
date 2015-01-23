@@ -1,11 +1,10 @@
 package com.example.findit;
 
 import com.example.findit.ml.DataSet;
-import com.example.findit.ml.SimpleDeltaAlgorithm;
+import com.example.findit.ml.SVMAlgorithm;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
@@ -14,7 +13,6 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -34,7 +32,8 @@ public class Core extends Activity implements DrawListener {
 
 	public DataSet trainingset;
 	public RecognitionSystem rec;
-	private SimpleDeltaAlgorithm alg;
+	// private SimpleDeltaAlgorithm alg;
+	private SVMAlgorithm alg;
 
 	private FrameLayout frame;
 
@@ -53,10 +52,14 @@ public class Core extends Activity implements DrawListener {
 				.newWakeLock(PowerManager.FULL_WAKE_LOCK, "WakeLock");
 		mWL.acquire();
 
-		trainingset = DataSet.loadXML(R.xml.set); // загружаем выборку
+		trainingset = DataSet.loadXML(R.xml.set2); // загружаем выборку
+		trainingset.setLabel("Column3");
 
-		alg = new SimpleDeltaAlgorithm("Column2", 0.87f); // алгоритм
+		// alg = new SimpleDeltaAlgorithm("Column2", 0.87f); // алгоритм
+		// alg.setDataSet(trainingset);
+		alg = new SVMAlgorithm("Column2", 0.8f);
 		alg.setDataSet(trainingset);
+		alg.learn();
 
 		rec = new RecognitionSystem(alg); // запускаем систему распознавания
 		rec.setDrawListener(this);
@@ -138,6 +141,7 @@ public class Core extends Activity implements DrawListener {
 
 	@Override
 	public void addObject(final int id, int x, int y) {
+		System.out.println("Add object " + id);
 		runOnUiThread(new Runnable() {
 
 			@Override
@@ -153,6 +157,7 @@ public class Core extends Activity implements DrawListener {
 
 	@Override
 	public void removeObject(final int id) {
+		System.out.println("Add object " + id);
 		runOnUiThread(new Runnable() {
 
 			@Override

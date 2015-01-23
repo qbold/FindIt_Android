@@ -9,7 +9,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.example.findit.selector.FeatureSelector;
 import com.example.findit.selector.HoGSelector;
-import com.example.findit.selector.SaveSelector;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -17,7 +16,6 @@ import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.os.Environment;
 
 /*
  * Отображение снимка с камеры и графические преобразования через OpenGL

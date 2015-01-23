@@ -17,11 +17,14 @@ public class RecognitionSystem extends Thread {
 	private HoGSelector hog;
 	private ArrayList<RecognizesObject> objects;
 
+	private long sleep;
+
 	private long dead_time;
 
 	{
 		objects = new ArrayList<>();
 		dead_time = 1000L;
+		sleep = 2000L;
 	}
 
 	public RecognitionSystem() {
@@ -29,6 +32,20 @@ public class RecognitionSystem extends Thread {
 
 	public RecognitionSystem(MLAlgorithm alg) {
 		algorithm = alg;
+	}
+
+	/*
+	 * Установить период распознавания
+	 */
+	public void setSleep(long s) {
+		sleep = s;
+	}
+
+	/*
+	 * Вернуть период распознавания
+	 */
+	public long getSleep() {
+		return sleep;
 	}
 
 	/*
@@ -132,6 +149,7 @@ public class RecognitionSystem extends Thread {
 				int cl = 0;
 				if ((cl = result.getResultClassification()) > 0) {
 					// Что-то распознали
+					System.out.println("recognize" + cl);
 					recognize(--cl);
 				}
 				// Удаляем старые метки и объекты
@@ -143,7 +161,7 @@ public class RecognitionSystem extends Thread {
 						i--;
 					}
 				}
-				Thread.sleep(50L);
+				Thread.sleep(sleep);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
