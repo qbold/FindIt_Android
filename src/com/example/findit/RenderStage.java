@@ -25,7 +25,7 @@ public class RenderStage {
 
 	public static byte FULL_SCREEN = 1, SMALL_PREVIEW = 0;
 
-	private Selector selector;
+	private ArrayList<Selector> selector;
 
 	private ArrayList<Uniform> uniforms;
 
@@ -161,15 +161,18 @@ public class RenderStage {
 	/*
 	 * Установить селектор
 	 */
-	public void setSelector(Selector s) {
-		selector = s;
+	public void addSelector(Selector s) {
+		if (selector == null)
+			selector = new ArrayList<>(1);
+		if (!selector.contains(s))
+			selector.add(s);
 	}
 
 	/*
 	 * Вернуть селектор
 	 */
-	public Selector getSelector() {
-		return selector;
+	public Selector getSelector(int i) {
+		return selector.get(i);
 	}
 
 	/*
@@ -264,7 +267,8 @@ public class RenderStage {
 
 		pixels.position(0);
 
-		selector.select(colors, Core.core.w);
+		for (Selector se : selector)
+			se.select(colors, Core.core.w);
 	}
 
 	/*

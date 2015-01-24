@@ -10,6 +10,10 @@ varying vec2 tex_coord;
 	√истограмма ориентированных градиентов (возвращает значение 0..255 (в шейдере 0..1), соответствующее углу направлени€ вектора градиента (»з (0; 359) вз€ли да сделали (0; 255)))
 */
 
+float grayscale(vec4 v) {
+	return v.x*0.299+v.y*0.587+v.z*0.114;
+}
+
 void main() {
 	vec2 t = tex_coord;
 	
@@ -32,6 +36,29 @@ void main() {
 	c_1 = (c_1v.x*0.299+c_1v.y*0.587+c_1v.z*0.114);
 	cv1 = (cv.x*0.299+cv.y*0.587+cv.z*0.114);
 	float Iy = c1-c_1;
+	
+	if(Ix*Ix+Iy*Iy<0.225) { Ix=0.0; Iy=0.0; }
+	
+	/*vec4 v_1_1 = texture2D(u_img, vec2(t.x-dx,t.y-dy));
+	vec4 v11 = texture2D(u_img, vec2(t.x+dx,t.y+dy));
+	vec4 v0_1 = texture2D(u_img, vec2(t.x,t.y-dy));
+	vec4 v01 = texture2D(u_img, vec2(t.x,t.y+dy));
+	vec4 v1_1 = texture2D(u_img, vec2(t.x+dx,t.y-dy));
+	vec4 v_11 = texture2D(u_img, vec2(t.x-dx,t.y+dy));
+	vec4 v_10 = texture2D(u_img, vec2(t.x-dx,t.y));
+	vec4 v10 = texture2D(u_img, vec2(t.x+dx,t.y));
+	
+	float c_1_1 = grayscale(v_1_1);
+	float c11 = grayscale(v11);
+	float c0_1 = 2.0*grayscale(v0_1);
+	float c01 = 2.0*grayscale(v01);
+	float c1_1 = grayscale(v1_1);
+	float c_11 = grayscale(v_11);
+	float c_10 = 2.0*grayscale(v_10);
+	float c10 = 2.0*grayscale(v10);
+	
+	float Ix = c10+c11+c1_1-c_10-c_11-c_1_1;
+	float Iy = c01+c_11+c11-c0_1-c_1_1-c1_1;*/
 	
 	float angle = 0.0;
 	//if(Ix != 0.0) {

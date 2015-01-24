@@ -146,6 +146,8 @@ public class HoGSelector implements Selector {
 			// div = (float) Math.sqrt(div);
 			for (int k = 0; k < count_columns; k++) {
 				tmp_blocks_histogram[index_block + k] /= div;
+				tmp_blocks_histogram[index_block + k] = (float) Math
+						.sqrt(tmp_blocks_histogram[index_block + k]);
 			}
 		}
 

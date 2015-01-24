@@ -42,6 +42,7 @@ public class DataSet {
 			}
 			count_classes = e.size();
 		}
+		System.out.println(count_classes);
 		return count_classes;
 	}
 
@@ -156,7 +157,7 @@ public class DataSet {
 
 	// Загрузка выборки из xml файла
 	public static DataSet loadXML(int resource) {
-		XmlPullParser p = Core.core.getResources().getXml(R.xml.set);
+		XmlPullParser p = Core.core.getResources().getXml(resource);
 		DataSet set = new DataSet();
 		try {
 			String tag = null;

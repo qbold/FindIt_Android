@@ -57,7 +57,7 @@ public class Core extends Activity implements DrawListener {
 
 		// alg = new SimpleDeltaAlgorithm("Column2", 0.87f); // אכדמנטעל
 		// alg.setDataSet(trainingset);
-		alg = new SVMAlgorithm("Column2", 0.8f);
+		alg = new SVMAlgorithm("Column2", 0.7f);
 		alg.setDataSet(trainingset);
 		alg.learn();
 

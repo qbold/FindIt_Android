@@ -9,6 +9,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import com.example.findit.selector.FeatureSelector;
 import com.example.findit.selector.HoGSelector;
+import com.example.findit.selector.SaveSelector;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -107,9 +108,6 @@ public class DrawView extends GLSurfaceView {
 			program7.addUniform(Uniform.FLOAT, "dx", dx);
 			program7.addUniform(Uniform.FLOAT, "dy", dy);
 
-			// program4.addUniform(Uniform.FLOAT, "dx", dx);
-			// program4.addUniform(Uniform.FLOAT, "dy", dy);
-
 			stages = new ArrayList<>();
 
 			int tx[] = new int[1];
@@ -152,10 +150,8 @@ public class DrawView extends GLSurfaceView {
 					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0,
 					false);
 			s2.as_output = true;
-			// s2.setSelector(new SaveSelector("/sdcard/_files/q/")); Тест
-			// glReadPixels
-			s2.setSelector(new FeatureSelector());
-			s2.addUniform(Uniform.FLOAT, "threshold", 0.2);
+			s2.addSelector(new FeatureSelector());
+			s2.addUniform(Uniform.FLOAT, "threshold", 0.1);
 			s2.addUniform(Uniform.IMAGE, "u_img", 0); // Харрис
 
 			RenderStage s6 = new RenderStage(program5, tx[0],
@@ -180,8 +176,8 @@ public class DrawView extends GLSurfaceView {
 					GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE0,
 					false);
 			s7.as_output = true;
-			// s7.setSelector(new SaveSelector("/sdcard/_files/q/"));
-			s7.setSelector((HoG = new HoGSelector(Core.core.w, Core.core.h)));
+			// s7.addSelector(new SaveSelector("/sdcard/_files/q/"));
+			s7.addSelector((HoG = new HoGSelector(Core.core.w, Core.core.h)));
 			Core.core.rec.setSelector(HoG);
 
 			// RenderStage s7 = new RenderStage(program7, new int[] {
@@ -220,8 +216,11 @@ public class DrawView extends GLSurfaceView {
 
 		@Override
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
-			GLES20.glViewport(0, 0, width, height);
-			Core.core.camera.startPreview();
+			try {
+				GLES20.glViewport(0, 0, width, height);
+				Core.core.camera.startPreview();
+			} catch (RuntimeException exp) {
+			}
 		}
 
 		@Override
